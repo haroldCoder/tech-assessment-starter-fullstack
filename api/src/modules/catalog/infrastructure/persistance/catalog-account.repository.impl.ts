@@ -2,6 +2,7 @@ import {
     Account,
     AccountCreationPolicy,
     AccountDeletionPolicy,
+    CreateClassProps,
 } from '../../domain/index.js';
 import { CatalogAccountRepository } from '../../domain/repositories/index.js';
 import { CatalogDomainError } from '../../domain/errors/index.js';
@@ -26,7 +27,7 @@ export class CatalogAccountRepositoryImpl implements CatalogAccountRepository {
      * Crea una nueva cuenta aplicando la validación de unicidad, existencia
      * del padre y herencia de naturaleza mediante AccountCreationPolicy.
      */
-    createAccount(account: Account): string {
+    createAccount(account: CreateClassProps): string {
         const validatedAccount = AccountCreationPolicy.validateAndCreate(
             {
                 code: account.code,
