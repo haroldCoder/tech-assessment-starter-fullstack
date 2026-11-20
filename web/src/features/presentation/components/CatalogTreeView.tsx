@@ -1,11 +1,20 @@
 import { useState, useMemo } from 'react';
 import { useCatalogTree } from '../hooks/useCatalogTree';
+import { TreeToolbar } from './TreeToolbar';
 import { TreeNodeItem } from './TreeNodeItem';
+import { NodeDetailPanel } from './NodeDetailPanel';
+import { CreateAccountModal } from './CreateAccountModal';
+import { DeleteAccountModal } from './DeleteAccountModal';
 import type { AccountTreeNode } from '../../domain';
 
 export function CatalogTreeView() {
   const { data: tree = [], isLoading, isError, error, refetch } = useCatalogTree();
   const [selectedNode, setSelectedNode] = useState<AccountTreeNode | null>(null);
+
+  // Estados de modales
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [createParentCode, setCreateParentCode] = useState<string | null>(null);
+  const [nodeToDelete, setNodeToDelete] = useState<AccountTreeNode | null>(null);
 
   // Recolecta todos los códigos de nodos que tienen hijas
   const allParentCodes = useMemo(() => {
@@ -22,11 +31,10 @@ export function CatalogTreeView() {
     return codes;
   }, [tree]);
 
-  // Conjunto de códigos actualmente expandidos (por defecto todos los padres)
+  // Conjunto de códigos actualmente expandidos
   const [expandedCodes, setExpandedCodes] = useState<Set<string>>(() => new Set());
-
-  // Al cargar el árbol por primera vez, expandimos todos los padres
   const [initializedTree, setInitializedTree] = useState(false);
+
   if (!initializedTree && allParentCodes.length > 0) {
     setExpandedCodes(new Set(allParentCodes));
     setInitializedTree(true);
@@ -44,54 +52,35 @@ export function CatalogTreeView() {
     });
   };
 
-  const handleExpandAll = () => {
-    setExpandedCodes(new Set(allParentCodes));
-  };
-
-  const handleCollapseAll = () => {
-    setExpandedCodes(new Set());
-  };
-
+  const handleExpandAll = () => setExpandedCodes(new Set(allParentCodes));
+  const handleCollapseAll = () => setExpandedCodes(new Set());
   const isNodeExpanded = (code: string) => expandedCodes.has(code);
+
+  const handleOpenCreateRoot = () => {
+    setCreateParentCode(null);
+    setIsCreateModalOpen(true);
+  };
+
+  const handleOpenCreateChild = (parentCode: string) => {
+    setCreateParentCode(parentCode);
+    setIsCreateModalOpen(true);
+  };
+
+  const handleOpenDelete = (node: AccountTreeNode) => {
+    setNodeToDelete(node);
+  };
 
   return (
     <div className="catalog-tree-container">
-      {/* Header y Acciones */}
-      <header className="catalog-header">
-        <div>
-          <h2>Catálogo de Cuentas Contables</h2>
-          <p className="catalog-subtitle">
-            Estructura jerárquica: Clases, Grupos, Cuentas y Subcuentas
-          </p>
-        </div>
-
-        <div className="catalog-actions">
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={handleExpandAll}
-            disabled={isLoading || tree.length === 0}
-          >
-            Expandir Todo
-          </button>
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={handleCollapseAll}
-            disabled={isLoading || tree.length === 0}
-          >
-            Colapsar Todo
-          </button>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => refetch()}
-            disabled={isLoading}
-          >
-            Refrescar
-          </button>
-        </div>
-      </header>
+      {/* Barra de herramientas superior */}
+      <TreeToolbar
+        isLoading={isLoading}
+        hasAccounts={tree.length > 0}
+        onOpenCreate={handleOpenCreateRoot}
+        onExpandAll={handleExpandAll}
+        onCollapseAll={handleCollapseAll}
+        onRefresh={() => refetch()}
+      />
 
       {/* Estados de carga y error */}
       {isLoading && (
@@ -115,6 +104,13 @@ export function CatalogTreeView() {
       {!isLoading && !isError && tree.length === 0 && (
         <div className="status-box empty-box">
           <p>No hay cuentas registradas en el catálogo actualmente.</p>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleOpenCreateRoot}
+          >
+            Crear Primera Clase
+          </button>
         </div>
       )}
 
@@ -130,46 +126,33 @@ export function CatalogTreeView() {
                 onToggleExpand={handleToggleExpand}
                 isNodeExpanded={isNodeExpanded}
                 onSelectNode={(node) => setSelectedNode(node)}
+                onAddChild={handleOpenCreateChild}
+                onDeleteNode={handleOpenDelete}
               />
             ))}
           </ul>
         </div>
       )}
 
-      {/* Panel de detalle de cuenta seleccionada */}
-      {selectedNode && (
-        <aside className="selected-node-panel">
-          <h4>Detalle de la Cuenta</h4>
-          <div className="node-detail-grid">
-            <div>
-              <strong>Código:</strong> {selectedNode.code}
-            </div>
-            <div>
-              <strong>Nombre:</strong> {selectedNode.name}
-            </div>
-            <div>
-              <strong>Nivel:</strong> {selectedNode.level}
-            </div>
-            <div>
-              <strong>Naturaleza:</strong> {selectedNode.nature === 'DEBIT' ? 'Débito' : 'Crédito'}
-            </div>
-            <div>
-              <strong>Padre:</strong> {selectedNode.parentCode || 'Ninguno (Clase Raíz)'}
-            </div>
-            <div>
-              <strong>Admite movimientos:</strong>{' '}
-              {selectedNode.allowsMovements ? 'Sí (Cuenta Hoja)' : 'No (Cuenta Agrupadora)'}
-            </div>
-          </div>
-          <button
-            type="button"
-            className="btn-close-detail"
-            onClick={() => setSelectedNode(null)}
-          >
-            Cerrar detalle
-          </button>
-        </aside>
-      )}
+      {/* Panel de detalle de la cuenta */}
+      <NodeDetailPanel
+        node={selectedNode}
+        onClose={() => setSelectedNode(null)}
+        onAddChild={handleOpenCreateChild}
+        onDeleteNode={handleOpenDelete}
+      />
+
+      {/* Modales de Crear y Eliminar */}
+      <CreateAccountModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        defaultParentCode={createParentCode}
+      />
+
+      <DeleteAccountModal
+        node={nodeToDelete}
+        onClose={() => setNodeToDelete(null)}
+      />
     </div>
   );
 }
