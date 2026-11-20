@@ -1,15 +1,254 @@
 :root {
-  font-family: system-ui, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.5;
-  color-scheme: light dark;
+  color: #1f2937;
+  background-color: #f8fafc;
 }
 
 body {
   margin: 0;
+  padding: 0;
 }
 
-main {
-  max-width: 48rem;
+.app-main {
+  max-width: 64rem;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 2rem 1.5rem;
+}
+
+/* Header */
+.catalog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 1rem;
+}
+
+.catalog-header h2 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.5rem;
+  color: #0f172a;
+}
+
+.catalog-subtitle {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.catalog-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.45rem 0.9rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background-color: #2563eb;
+  color: white;
+}
+.btn-primary:hover:not(:disabled) {
+  background-color: #1d4ed8;
+}
+
+.btn-secondary {
+  background-color: #ffffff;
+  color: #334155;
+  border-color: #cbd5e1;
+}
+.btn-secondary:hover:not(:disabled) {
+  background-color: #f1f5f9;
+}
+
+.btn-outline {
+  background-color: transparent;
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+/* Status boxes */
+.status-box {
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  text-align: center;
+  margin: 1rem 0;
+}
+.loading-box {
+  background-color: #f0fdf4;
+  color: #166534;
+}
+.error-box {
+  background-color: #fef2f2;
+  color: #991b1b;
+}
+.empty-box {
+  background-color: #f8fafc;
+  color: #64748b;
+  border: 1px dashed #cbd5e1;
+}
+
+/* Tree Structure */
+.tree-wrapper {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.tree-root-list,
+.tree-children-list {
+  list-style: none;
+  margin: 0;
+  padding-left: 0;
+}
+
+.tree-children-list {
+  padding-left: 1.75rem;
+  border-left: 1px dashed #cbd5e1;
+  margin-left: 0.75rem;
+}
+
+.tree-node-item {
+  margin: 0.25rem 0;
+}
+
+.tree-node-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.tree-node-row:hover {
+  background-color: #f8fafc;
+}
+
+/* Toggle Expand Button */
+.toggle-button {
+  background: transparent;
+  border: none;
+  font-size: 0.75rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #64748b;
+  border-radius: 0.25rem;
+}
+
+.toggle-button:hover:not(:disabled) {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+
+.toggle-button:disabled {
+  cursor: default;
+  color: #94a3b8;
+}
+
+/* Node data items */
+.account-code {
+  font-family: monospace;
+  font-weight: 700;
+  color: #0f172a;
+  min-width: 4.5rem;
+}
+
+.account-name {
+  font-weight: 500;
+  color: #334155;
+  flex: 1;
+}
+
+/* Badges */
+.badge-level,
+.badge-nature,
+.badge-movement {
+  font-size: 0.725rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.25rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.nature-debit {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.nature-credit {
+  background-color: #ffedd5;
+  color: #c2410c;
+}
+
+.movement-allowed {
+  background-color: #e0e7ff;
+  color: #3730a3;
+}
+
+.movement-blocked {
+  background-color: #f1f5f9;
+  color: #64748b;
+}
+
+/* Selected Node Details */
+.selected-node-panel {
+  margin-top: 1.5rem;
+  background-color: #ffffff;
+  border: 1px solid #bfdbfe;
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.05);
+}
+
+.selected-node-panel h4 {
+  margin: 0 0 0.75rem 0;
+  color: #1e40af;
+}
+
+.node-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.btn-close-detail {
+  font-size: 0.75rem;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+}
+.btn-close-detail:hover {
+  background: #e2e8f0;
 }

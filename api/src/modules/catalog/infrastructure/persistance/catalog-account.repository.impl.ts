@@ -6,6 +6,7 @@ import {
 } from '../../domain/index.js';
 import { CatalogAccountRepository } from '../../domain/repositories/index.js';
 import { CatalogDomainError } from '../../domain/errors/index.js';
+import { createInitialSeedAccounts } from './catalog-seed.data.js';
 
 export class CatalogAccountNotFoundError extends CatalogDomainError {
     constructor(accountCode: string) {
@@ -19,7 +20,7 @@ export class CatalogAccountNotFoundError extends CatalogDomainError {
 export class CatalogAccountRepositoryImpl implements CatalogAccountRepository {
     private readonly accounts: Account[] = [];
 
-    constructor(initialAccounts: Account[] = []) {
+    constructor(initialAccounts: Account[] = createInitialSeedAccounts()) { // aqui vamos a ponerle datos de prueba por ahora
         this.accounts = [...initialAccounts];
     }
 
