@@ -1,47 +1,125 @@
-# Arranque de la prueba técnica full-stack
+# Catálogo de Cuentas Contables (Full-Stack Assessment)
 
-Backend y frontend listos para correr, ya conectados entre sí. Es el punto de partida de la prueba, para que no gastes tiempo en instalar y configurar.
+Sistema de gestión y visualización de catálogo contable jerárquico bajo principios de Arquitectura Limpia (Clean Architecture), Domain-Driven Design (DDD) y principios SOLID, estructurado en backend (NestJS) y frontend (React + Vite).
 
-| Carpeta | Qué hay | Puerto |
-|---------|---------|:------:|
-| `api/` | NestJS con TypeScript, con CORS habilitado hacia el front | 3000 |
-| `web/` | React con Vite y TypeScript | 5173 |
+---
 
-Trae **solo lo que generan los CLI de Nest y de Vite**. No hay estructura de capas, ni entidades, ni interfaces de repositorio, ni librería de componentes, ni manejo de estado. Esas decisiones son tuyas y son parte de lo que se evalúa, así que cuéntanos en voz alta por qué las tomas. Si quieres reorganizar las carpetas, hazlo y explica por qué.
+## 🚀 Cómo correr el proyecto
 
-## Requisitos
+### Requisitos previos
+- **Node.js**: v22 o superior (compatible con `.nvmrc`).
+- **npm**: v10 o superior.
 
-- **Node 22** (está en `.nvmrc`, con `nvm use` queda listo).
-- **npm 10 o superior.** Con npm 9.2 la instalación falla. Revisa con `npm -v` antes de empezar.
-
-## Cómo correrlo
-
+### Instalación y arranque
 ```bash
-npm install     # instala la raíz, api/ y web/
-npm run dev     # levanta los dos a la vez
+# 1. Instalar dependencias en raíz, backend (api) y frontend (web)
+npm install
+
+# 2. Levantar API y Frontend concurrentemente en modo desarrollo
+npm run dev
 ```
 
-Abre http://localhost:5173. Si ves *La API respondió: Hello World!*, el frontend está hablando con el backend y puedes empezar.
+- **Frontend**: [http://localhost:5173](http://localhost:5173)
+- **Backend (API)**: [http://localhost:3000](http://localhost:3000)
 
-Esa pantalla existe solo para comprobar la conexión. Bórrala y construye lo tuyo.
+### Scripts disponibles
+| Comando | Descripción |
+|---|---|
+| `npm run dev` | Ejecuta API y Frontend en paralelo con recarga en caliente |
+| `npm run dev:api` | Ejecuta únicamente el backend (`api`) |
+| `npm run dev:web` | Ejecuta únicamente el frontend (`web`) |
+| `npm run build` | Compila ambos proyectos para producción |
+| `npm test` | Ejecuta la suite de pruebas unitarias con Vitest |
+| `npm run lint` | Análisis estático y linter en ambos proyectos con oxlint |
 
-## Scripts
+---
 
-| Script | Qué hace |
-|--------|----------|
-| `npm run dev` | Levanta la API y el front juntos, en modo watch |
-| `npm run dev:api` | Solo la API |
-| `npm run dev:web` | Solo el front |
-| `npm run build` | Compila los dos |
-| `npm test` | Corre las pruebas de la API con Vitest |
-| `npm run lint` | Revisa los dos con oxlint |
+## 🏛️ Arquitectura del Proyecto
 
-## Configuración
+Tanto en el backend como en el frontend se implementó una **Arquitectura en Capas desacopladas (Clean Architecture)** complementada con **Domain-Driven Design (DDD)** y principios **SOLID**:
 
-El front lee la URL de la API de `VITE_API_URL`. Si no defines la variable, usa `http://localhost:3000`, así que no tienes que configurar nada para empezar. El ejemplo está en [`web/.env.example`](./web/.env.example).
+```
+tech-assessment-starter-fullstack/
+├── api/                                # Backend en NestJS
+│   └── src/
+│       ├── modules/catalog/            # Módulo de Catálogo Contable
+│       │   ├── domain/                 # Entidades, Value Objects, Políticas y Contratos
+│       │   │   ├── entities/           # Account (Entidad), AccountCode (VO), Enums
+│       │   │   ├── policies/           # Políticas de Creación, Eliminación y Movimiento
+│       │   │   ├── repositories/       # Interfaz CatalogAccountRepository y contratos
+│       │   │   └── errors/             # Excepciones de dominio tipadas
+│       │   ├── infrastructure/         # Repositorios en memoria y seed data
+│       │   ├── application/            # Casos de uso de negocio (Use Cases)
+│       │   ├── presentation/           # Controladores, DTOs y Filtros de Excepciones HTTP
+│       │   └── catalog.module.ts       # Inyección de dependencias (useClass / useFactory)
+│       └── app.module.ts
+│
+└── web/                                # Frontend en React + Vite
+    └── src/
+        └── features/                   # Feature modular del catálogo
+            ├── domain/                 # Modelos de árbol y contratos de interfaz
+            ├── infrastructure/         # Repositorio HTTP (consumo de endpoints)
+            ├── application/            # Casos de uso en el cliente (Use Cases)
+            └── presentation/           # Componentes UI desacoplados y Custom Hooks
+                ├── components/         # TreeToolbar, TreeNodeItem, NodeBadges, NodeRowActions, etc.
+                └── hooks/              # Hooks con TanStack Query (useCatalogTree, mutaciones)
+```
 
-La API acepta peticiones del origen que diga `WEB_ORIGIN`, y por defecto `http://localhost:5173`. Si cambias el puerto del front, cambia esa variable.
+### Principios SOLID aplicados:
+- **S (Single Responsibility)**: Cada clase, caso de uso y componente React posee una responsabilidad única (ej. `NodeBadges` solo representa metadata, `CreateAccountUseCase` solo gestiona altas, `AccountMovementPolicy` evalúa si admite asientos contables).
+- **O (Open/Closed)**: Abstracciones mediante contratos de repositorio (`CatalogAccountRepository`) permitiendo cambiar la persistencia sin modificar lógica de aplicación.
+- **L (Liskov Substitution)**: Las implementaciones en memoria y HTTP respetan los contratos de sus interfaces base sin efectos colaterales.
+- **I (Interface Segregation)**: DTOs, modelos y props de componentes están divididos en interfaces concisas y específicas.
+- **D (Dependency Inversion)**: Casos de uso y controladores dependen de abstracciones, inyectadas mediante el contenedor IoC de NestJS (`CATALOG_ACCOUNT_REPOSITORY` con `useClass`).
 
-## Antes de entregar
+---
 
-Reemplaza este archivo por tu propio `README.md`, con cómo se corre tu proyecto, qué decisiones tomaste, qué dejaste afuera y qué harías con más tiempo.
+## ⚙️ Reglas de Negocio Implementadas
+
+1. **Estructura y Longitud de Código**:
+   - `1 dígito` → **Clase**
+   - `2 dígitos` → **Grupo**
+   - `4 dígitos` → **Cuenta**
+   - `6 dígitos` → **Subcuenta**
+   - Validación estricta de códigos exclusivamente numéricos mediante el Value Object `AccountCode`.
+2. **Jerarquía y Padre**: El padre de una cuenta es su prefijo en el nivel anterior (ej. padre de `110505` es `1105`, de `1105` es `11`, de `11` es `1`). Las Clases no tienen padre.
+3. **Existencia del Padre (`AccountCreationPolicy`)**: No se puede registrar una cuenta si su cuenta padre no existe en el catálogo.
+4. **Protección contra Eliminación (`AccountDeletionPolicy`)**: No se puede eliminar una cuenta que contenga cuentas hijas asociadas.
+5. **Cuentas Imputables vs Agrupadoras (`AccountMovementPolicy`)**: Únicamente las cuentas hoja (sin hijas) admiten movimientos o asientos contables directos (`allowsMovements: true`).
+6. **Unicidad de Código**: Cada código de cuenta es único en todo el catálogo contable.
+7. **Herencia de Naturaleza**: Cada Clase define su naturaleza contable (`DEBIT` o `CREDIT`), y todos sus grupos, cuentas y subcuentas descendientes la heredan automáticamente.
+
+---
+
+## 🛠️ Tecnologías Utilizadas
+
+### Backend (`api/`)
+- **Node.js 22** con soporte nativo ECMAScript Modules (ESM).
+- **NestJS 12**: Framework modular empresarial para APIs RESTful.
+- **TypeScript**: Tipado estricto (`strict: true`, `NodeNext` module resolution).
+- **Vitest**: Suite de pruebas unitarias rápida y moderna para las reglas del dominio y repositorio.
+- **Oxlint**: Linter ultrarrápido basado en Rust.
+
+### Frontend (`web/`)
+- **React 19**: Biblioteca de UI basada en componentes funcionales.
+- **Vite 8**: Herramienta de compilación y empaquetado de alto rendimiento.
+- **TanStack Query (React Query) v5**: Gestión del estado del servidor, caché reactivo e invalidación automática tras mutaciones (`useMutation`, `useQuery`).
+- **CSS Nativo Moderno**: Diseño responsivo, badges dinámicos por nivel/naturaleza y animaciones para el árbol jerárquico.
+
+---
+
+## 📌 Endpoints API
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/catalog/accounts` | Retorna el árbol contable jerárquico con indicador `allowsMovements` |
+| `POST` | `/catalog/accounts` | Crea una cuenta validando unicidad, existencia del padre y herencia |
+| `DELETE` | `/catalog/accounts/:code` | Elimina una cuenta hoja (bloquea si tiene hijas con código `400 Bad Request`) |
+
+---
+
+## 💡 Conclusión
+
+El proyecto fue diseñado para demostrar cómo la separación de responsabilidades y el modelado de dominio enriquecido resuelven la complejidad contable de manera limpia y escalable. Al aislar la lógica central en entidades y políticas puras en TypeScript, las reglas de negocio quedan completamente protegidas de cambios en frameworks, bases de datos o bibliotecas de interfaz. 
+
+La integración con **TanStack Query** en el frontend asegura una sincronización instantánea y consistente con el servidor, brindando al usuario una experiencia fluida al navegar, expandir, crear y eliminar cuentas dentro del catálogo jerárquico.
